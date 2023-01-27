@@ -1,0 +1,44 @@
+dotnet ef dbcontext scaffold "server=localhost;port=3306;user=root;password=Z5@uUCY1;database=walkindb" Mysql.Data.EntityFrameworkCore
+
+
+
+
+using Microsoft.AspNetCore.Mvc;
+using MySqlConnector;
+using Dapper;
+using MyFirstWebAPIProject.Models;
+
+namespace MyFirstWebAPIProject.Controllers;
+
+[ApiController]
+[Route("api/[controller]")]
+public class WalkInController : ControllerBase
+{
+
+    private IConfiguration Configuration;
+     public DBConnect Db { get; }
+    public WalkInController(IConfiguration _configuration, DBConnect db)
+    {
+        Configuration = _configuration;
+        Db = db;
+    }
+
+
+    [HttpGet]
+    public async Task<Prefetch> Get()
+    {
+        var connString = this.Configuration.GetConnectionString("DefaultConnection");
+        var sql = "call prefetch()";
+        Prefetch Result = new Prefetch();
+        using (var connection = new MySqlConnection(connString))
+        {
+            var results = await connection.QueryMultipleAsync(sql);
+            Result.Technologies = await results.ReadAsync<string>();
+            Result.Roles = await results.ReadAsync<string>();
+            Result.Colleges = await results.ReadAsync<string>();
+            Result.Streams = await results.ReadAsync<string>();
+            Result.Qualifications = await results.ReadAsync<string>();
+        }
+        return Result;
+    }
+}

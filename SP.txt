@@ -1,0 +1,111 @@
+CREATE DEFINER=`root`@`localhost` PROCEDURE `create_user`(
+	IN e_mail varchar(45),
+    IN password varchar(45),
+    in profile_picture varchar(255),
+    in firstname varchar(45),
+    in lastname varchar(45),
+    in phone_no varchar(15),
+    in resume_link varchar(255),
+    in portfolio_link varchar(255),
+    in referal varchar(45),
+    in send_mail tinyint,
+    in previously_applied_role varchar(45),
+    in applicant_type_id INT,
+    in passing_year YEAR,
+    in percentage decimal(5,2),
+    in location varchar(45),
+    in stream_id int,
+    in qualification_id int,
+    in college_id int
+)
+BEGIN
+declare email_id varchar(45);
+declare inserted_user_id int;
+
+IF ( SELECT EXISTS (SELECT 1 from user where email = e_mail)) then
+	select "User Exists";
+    set inserted_user_id := -1;
+else
+	insert into user value (DEFAULT, md5(password), profile_picture, firstname, lastname, e_mail, phone_no, resume_link, portfolio_link, referal, send_mail, previously_applied_role, applicant_type_id);
+    set inserted_user_id := last_insert_id();
+    insert into education value (DEFAULT,passing_year, percentage, location, inserted_user_id, stream_id, qualification_id, college_id);
+end if;
+	select inserted_user_id;
+END
+
+
+
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+CREATE DEFINER=`root`@`localhost` PROCEDURE `experience`(
+	in years DECIMAL(3,1),
+    in current_ctc varchar(10),
+    in expected_ctc varchar(10),
+    in notice_end DATE,
+    in notice_duration varchar(10),
+    in user_id int
+)
+BEGIN
+declare experience_id int;
+	insert into experience
+    value (DEFAULT, years, current_ctc, expected_ctc,notice_end,notice_duration, user_id);
+    set experience_id := last_insert_id();
+    select experience_id;
+END
+
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+CREATE DEFINER=`root`@`localhost` PROCEDURE `expertise_tech`(
+in id int,
+in tech_id int)
+BEGIN
+	insert into expertise_technology (id,experience_id,technology_id) value (default, id, tech_id);
+END
+
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+CREATE DEFINER=`root`@`localhost` PROCEDURE `expertise_tech_other`(
+in id int,
+in other varchar(45))
+BEGIN
+	insert into expertise_technology (id,experience_id, other_technology) value (default, id, other);
+END
+
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+CREATE DEFINER=`root`@`localhost` PROCEDURE `familiar_tech`(
+in id int,
+in tech_id int)
+BEGIN
+	insert into user_familiar_technology (id,user_id,technology_id) value (default, id, tech_id);
+END
+
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+CREATE DEFINER=`root`@`localhost` PROCEDURE `familiar_tech_other`(
+in id int,
+in other varchar(45))
+BEGIN
+	insert into user_familiar_technology (id,user_id, other_technology) value (default, id, other);
+END
+
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+CREATE DEFINER=`root`@`localhost` PROCEDURE `pref_job_role`(
+in id INT,
+in job_id int)
+BEGIN
+	insert into preferred_role value (DEFAULT, id, job_id);
+END
+
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+CREATE DEFINER=`root`@`localhost` PROCEDURE `prefetch`()
+BEGIN
+	select id,technology from technology;
+	select id,name from job_role ;
+	select id,college_name from college;
+	select id,stream from stream;
+	select id,qualification from qualification;
+
+END

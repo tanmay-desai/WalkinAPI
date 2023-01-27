@@ -28,11 +28,19 @@ public class WalkInController : ControllerBase
     }
 
     [HttpPost("/createUser")]
-    public Task<int> CreateUser([FromBody] CreateUser user)
+    public async Task<IActionResult> CreateUser([FromBody] CreateUser user)
     {
+
         DBConnect db = new DBConnect(Configuration);
         var query = new QueryHelper(db);
-        var Result = query.CreateUser(user);
-        return Result;
+        var Result = await query.CreateUser(user);
+        if (Result == -1)
+        {
+            return StatusCode(StatusCodes.Status500InternalServerError, "Error in the details");
+        }
+        else
+        {
+            return Ok($"user created sucessfully: {Result}");
+        }
     }
 }

@@ -20,7 +20,7 @@ public class QueryHelper
 
     public async Task<Prefetch> GetData()
     {
-        var sql = "call prefetch()";
+        string sql = "call prefetch()";
         Prefetch Result = new Prefetch();
 
         var results = await Db.Connection.QueryMultipleAsync(sql);
@@ -33,29 +33,23 @@ public class QueryHelper
         return Result;
     }
 
-    public async Task<dynamic> CreateUser(CreateUser user)
+    public async Task<int> CreateUser(CreateUser user)
     {
         try
         {
-            var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
-            var sql = $"call create_user('{user.password}','{user.profile_picture}','{user.firstname}','{user.lastname}','{user.email}','{user.phone_no}','{user.resume_link}','{user.portfolio_link}','{user.referal}',{user.send_mail},'{user.previously_applied_role}',{user.applicant_type_id},{user.passing_year},{user.percentage},'{user.college_location}',{user.stream_id},{user.qualification_id},{user.college_id})";
-            var result = await Db.Connection.QuerySingleAsync<int>(sql);
+            TransactionScope scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
+            string sql = $"call create_user('{user.password}','{user.profile_picture}','{user.firstname}','{user.lastname}','{user.email}','{user.phone_no}','{user.resume_link}','{user.portfolio_link}','{user.referal}',{user.send_mail},'{user.previously_applied_role}',{user.applicant_type_id},{user.passing_year},{user.percentage},'{user.college_location}',{user.stream_id},{user.qualification_id},{user.college_id})";
+            int result = await Db.Connection.QuerySingleAsync<int>(sql);
             if (result != -1)
             {
                 if (user.preferred_job_roles != null)
                 {
-                    foreach (int i in user.preferred_job_roles)
-                    {
-                        await Db.Connection.QueryAsync($"call pref_job_role({result},{i})");
-                    }
+                    await Db.Connection.QueryAsync($"call pref_job_role({result},'{user.preferred_job_roles}')");
                 }
 
                 if (user.familiar_tech != null)
                 {
-                    foreach (int i in user.familiar_tech)
-                    {
-                        await Db.Connection.QueryAsync($"call familiar_tech({result},{i})");
-                    }
+                    await Db.Connection.QueryAsync($"call familiar_tech({result},'{user.familiar_tech}')");
                 }
 
                 if (user.other_familiar_tech != "")
@@ -70,10 +64,7 @@ public class QueryHelper
 
                     if (user.expertise_tech != null)
                     {
-                        foreach (int i in user.expertise_tech)
-                        {
-                            await Db.Connection.QueryAsync($"call expertise_tech({exp_id},{i})");
-                        }
+                        await Db.Connection.QueryAsync($"call expertise_tech({exp_id},'{user.expertise_tech}')");
                     }
 
                     if (user.other_familiar_tech != "")
@@ -83,10 +74,12 @@ public class QueryHelper
                 }
             }
             scope.Complete();
+            Db.Connection.Close();
             return result;
         }
         catch
         {
+            Db.Connection.Close();
             return -1;
         }
     }

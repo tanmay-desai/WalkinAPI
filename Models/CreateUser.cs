@@ -20,8 +20,8 @@ public class CreateUser
     public int stream_id { get; set; }
     public int qualification_id { get; set; }
     public int college_id { get; set; }
-    public List<int>? preferred_job_roles { get; set; }
-    public List<int>? familiar_tech { get; set; }
+    public string? preferred_job_roles { get; set; }
+    public string? familiar_tech { get; set; }
     public string? other_familiar_tech { get; set; }
 
     public int years { get; set; }
@@ -29,6 +29,6 @@ public class CreateUser
     public string? expected_ctc { get; set; }
     public string? notice_period_end { get; set; }
     public string? notice_duration { get; set; }
-    public List<int>? expertise_tech { get; set; }
+    public string? expertise_tech { get; set; }
     public string? other_expertise_tech { get; set; }
 }

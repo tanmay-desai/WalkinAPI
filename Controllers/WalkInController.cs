@@ -33,7 +33,7 @@ public class WalkInController : ControllerBase
 
         DBConnect db = new DBConnect(Configuration);
         QueryHelper query = new QueryHelper(db);
-        int Result = await query.CreateUser(user);
+        var Result = await query.CreateUser(user);
         if (Result == -1)
         {
             return StatusCode(StatusCodes.Status500InternalServerError, "Error in the details");
